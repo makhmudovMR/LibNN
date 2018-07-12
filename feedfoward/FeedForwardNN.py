@@ -1,6 +1,10 @@
 import numpy as np
 import random
 
+
+from feedfoward import subsidiary
+
+
 class FeedFowrard(object):
 
 
@@ -12,8 +16,16 @@ class FeedFowrard(object):
 
         self.output = output
 
+        self.activations = []
+
 
     def feedforward(self, a):
+        for b, w in zip(self.biases, self.weights):
+            a = subsidiary.sigmoid(np.dot(w,a) + b)
+            self.activations.append(a) # без учёта входных сиганлов
+        return a
+
+    def SGD(self, trainig_data, epochs, mini_batch_size, lr, test_data=None):
         pass
 
 
