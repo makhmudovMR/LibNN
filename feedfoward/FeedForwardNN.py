@@ -123,7 +123,7 @@ class FeedFowrard(object):
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
         for l in range(2, self.num_layers):
-            z = zs[-1]
+            z = zs[-l]
             sp = subsidiary.sigmoid_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta)* sp
             nabla_b[-l] = delta
