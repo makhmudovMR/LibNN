@@ -15,7 +15,7 @@ class FeedFowrard(object):
         '''
         self.num_layers = len(sizes)
         self.sizes = sizes
-        self.biases = [np.random.randn(y,1) for y in sizes[:1]]
+        self.biases = [np.random.randn(y,1) for y in sizes[1:]]
         self.weights = [np.random.randn(y,x) for x,y in zip(sizes[:-1], sizes[1:])]
 
         self.output = output
@@ -27,6 +27,7 @@ class FeedFowrard(object):
         :param a:
         :return:
         '''
+        print(a)
         for b, w in zip(self.biases, self.weights):
             a = subsidiary.sigmoid(np.dot(w,a) + b)
             self.activations.append(a) # без учёта входных сиганлов
@@ -63,5 +64,71 @@ class FeedFowrard(object):
         if test_data is not None:
             return success_tests / n_test
 
+    def update_mini_batch(self, mini_batch, lr):
+        """
+        Обновить веса и смещения нейронной сети, сделав шаг градиентного
+        спуска на основе алгоритма обратного распространения ошибки, примененного
+        к одному mini batch.
+        ``mini_batch`` - список кортежей вида ``(x, y)``,
+        ``eta`` - величина шага (learning rate).
+        """
+        '''
+        РАЗОБРАТЬ!
+        '''
+
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+
+        for x, y in mini_batch:
+            delta_nabla_b, delta_nabla_w = self.backprop(x,y)
+            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+
+        eps = lr / len(mini_batch)
+        self.weights = [w - eps * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - eps * nb for b, nd in zip(self.biases, nabla_b)]
+
+    def backprop(self, x, y):
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+
+        activation = x
+        activations = [x]
+        zs = []
+
+        for b,w in zip(self.biases, self.weights):
+            z = np.dot(w, activation)+b
+            zs.append(z)
+            activation = subsidiary.sigmoid(z)
+            activations.append(activation)
+
+        delta = self.cost_derivative(activations[-1], y) / subsidiary.sigmoid_prime(zs[-1])
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+
+        for l in range(2, self.num_layers):
+            z = zs[-1]
+            sp = subsidiary.sigmoid_prime(z)
+            delta = np.dot(self.weights[-l+1].transpose(), delta)* sp
+            nabla_b[-l] = delta
+            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+        return nabla_b, nabla_w
+
+
+    def cost_derivative(self, output_activation, y):
+        return (output_activation - y)
+
+
 if __name__ == '__main__':
-    nn = FeedFowrard()
+    nn = FeedFowrard([2,3,2])
+    x = np.array([1,1], ndmin=2).T
+    y = np.array([0,1], ndmin=2).T
+    print('x:',x)
+    print('y:',y)
+
+    print('----')
+    print(nn.weights)
+    print(nn.biases)
+    print('----')
+
+    print(nn.feedforward(x))
