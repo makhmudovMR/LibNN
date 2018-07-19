@@ -5,7 +5,7 @@ import random
 from feedfoward import subsidiary
 
 
-class FeedFowrard(object):
+class FeedFowrardNN_SGD(object):
 
     def __init__(self, sizes = [2,3,2], output=True):
         '''
@@ -125,10 +125,10 @@ class FeedFowrard(object):
         for l in range(2, self.num_layers):
             z = zs[-l]
             sp = subsidiary.sigmoid_prime(z)
-            delta = np.dot(self.weights[-l+1].transpose(), delta)* sp
+            delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
             nabla_b[-l] = delta
-            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
-        return nabla_b, nabla_w
+            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
+        return (nabla_b, nabla_w)
 
 
     def cost_derivative(self, output_activation, y):
