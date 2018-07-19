@@ -56,7 +56,7 @@ class FeedForwardNN(object):
 
 
 if __name__ == '__main__':
-    nn = NN([2,5,2])
+    nn = FeedForwardNN([2,5,2])
     x = np.array([0,1], ndmin=2).T
     y = np.array([1,0], ndmin=2).T
     print(nn.forward(x))
